@@ -2,6 +2,7 @@
 export default function Home() {
   async function submit(formData: FormData) {
     'use server';
+    console.log(formData.get("email"));
     const headers = new Headers([
       ["Content-Type", "application/json"],
       ["Authorization", "Bearer " + process.env.SENDGRID_API_KEY ]
@@ -50,7 +51,7 @@ export default function Home() {
         </div>
         <div>
           <button type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition duration-200">
+            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
             送信
           </button>
         </div>
