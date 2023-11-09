@@ -1,44 +1,32 @@
+'use client';
+import { useFormState, useFormStatus } from "react-dom";
+import { submitInquiry } from "./lib/actions"
+
+function Submit() {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit"
+      className={`px-8 py-2 rounded text-white ${pending ? "bg-gray-500 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"}`}
+      disabled={pending}
+    >
+      {/* {pending &&
+        <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      } */}
+      {pending ? "送信中..." : "送信"}
+    </button>
+)
+}
 
 export default function Home() {
-  async function submit(formData: FormData) {
-    'use server';
-    console.log(formData.get("email"));
-    const headers = new Headers([
-      ["Content-Type", "application/json"],
-      ["Authorization", "Bearer " + process.env.SENDGRID_API_KEY ]
-    ]);
-    const requestBody = {
-      "personalizations": [
-        {
-          "to": [
-            {
-              "email": formData.get("email")
-            }
-          ]
-        }
-      ],
-      "subject": "お問い合わせを受け付けました。",
-      "from": {
-        "email": "from@example.com"
-      },
-      "content": [
-        {
-          "type": "text/plain",
-          "value": "以下の内容でお問い合わせを受け付けました。\r\n" + formData.get("content")
-        }
-      ]
-    };
-    const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-      headers: headers
-    });
-  }
-  
+  const [formState, formAction] = useFormState(submitInquiry, {});
+
   return (
     <div className="max-w-md mx-auto mt-4 bg-white p-6 rounded shadow-md">
-      <h1 className="text-xl font-bold mb-4">問い合わせフォーム</h1>
-      <form action={submit}>
+      <h1 className="text-xl font-bold mb-4">お問い合わせフォーム</h1>
+      <form action={formAction}>
         <div className="mb-4">
           <label htmlFor="email" className="block text-sm font-medium text-gray-600">メールアドレス</label>
           <input type="email" id="email" name="email" required
@@ -49,12 +37,10 @@ export default function Home() {
           <textarea id="content" name="content" rows={4} required
             className="mt-1 p-2 w-full border rounded-md"></textarea>
         </div>
-        <div>
-          <button type="submit"
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">
-            送信
-          </button>
+        <div className="flex justify-center">
+          <Submit />
         </div>
+        <div className={`flex justify-center mt-4 ${formState.success ? '' : 'text-red-600'}`}>{formState.message}</div>
       </form>
     </div>
   )
